@@ -1,0 +1,266 @@
+# Tracyn Go Lint Config — golangci-lint v2
+# Based on https://github.com/maratori/golangci-lint-config
+# Adapted for: ConnectRPC, SQLC, pgx, slog, OpenTelemetry
+
+version: "2"
+
+issues:
+  max-same-issues: 50
+
+formatters:
+  enable:
+    - goimports
+    - golines
+
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/atmos-hq
+
+    golines:
+      max-len: 120
+
+linters:
+  enable:
+    # ── Error handling (critical) ─────────────────────────────────────
+    - errcheck       # unchecked errors
+    - errname        # sentinel errors: ErrXxx
+    - errorlint      # error wrapping, %w enforcement
+    - nilerr         # returning nil after error check
+    - nilnesserr     # err != nil but returns different nil error
+
+    # ── Static analysis ───────────────────────────────────────────────
+    - govet          # suspicious constructs
+    - staticcheck    # includes gosimple + stylecheck
+    - unused         # dead code
+    - ineffassign    # useless assignments
+    - unconvert      # unnecessary type conversions
+    - wastedassign   # wasted assignment statements
+
+    # ── Security ──────────────────────────────────────────────────────
+    - gosec          # security problems
+
+    # ── Context & HTTP (critical for gRPC) ────────────────────────────
+    - bodyclose      # unclosed HTTP response bodies
+    - containedctx   # context.Context in structs (bad pattern)
+    - contextcheck   # context propagation (critical for gRPC services)
+    - fatcontext     # nested contexts in loops
+    - noctx          # HTTP requests without context
+
+    # ── Code quality ──────────────────────────────────────────────────
+    - revive         # extensible, replaces golint
+    - gocritic       # opinionated improvements
+    - exhaustive     # exhaustive switch/map statements
+    - misspell       # typos in comments and strings
+    - prealloc       # slice preallocation hints
+
+    # ── Conventions ───────────────────────────────────────────────────
+    - goprintffuncname # printf func naming
+    - gomoddirectives  # go.mod hygiene
+    - depguard         # block bad packages
+
+    # ── Safe additions from golden config ─────────────────────────────
+    - asciicheck       # non-ASCII identifiers
+    - bidichk          # dangerous unicode sequences
+    - copyloopvar      # loop variable copies (Go 1.22+)
+    - durationcheck    # two durations multiplied
+    - intrange         # integer range in for loops
+    - nolintlint       # ill-formed nolint directives
+    - perfsprint       # faster fmt.Sprintf alternatives
+    - predeclared      # shadowing predeclared identifiers
+    - reassign         # package variable reassignment
+    - recvcheck        # receiver type consistency
+    - usestdlibvars    # use stdlib vars/constants
+    - whitespace       # leading/trailing whitespace
+    - modernize        # simplify with modern Go features
+    - exptostd         # replace golang.org/x/exp with stdlib
+    - mirror           # wrong mirror patterns of bytes/strings
+
+    # ── SQL & DB ──────────────────────────────────────────────────────
+    - sqlclosecheck    # sql.Rows and sql.Stmt closed
+    - rowserrcheck     # rows.Err() checked
+
+    # ── Testing ───────────────────────────────────────────────────────
+    - testifylint      # testify best practices
+    - tparallel        # t.Parallel() usage
+    - usetesting       # testing package replacements
+
+    # ── Telemetry ─────────────────────────────────────────────────────
+    - spancheck        # OpenTelemetry/Census span mistakes
+    - sloglint         # slog consistency
+
+    # ── Protobuf ──────────────────────────────────────────────────────
+    - protogetter      # proto field getters
+
+    # ── Complexity & structure ──────────────────────────────────────────
+    - nonamedreturns   # named returns
+    - nestif           # deeply nested if statements
+    - nilnil           # simultaneous nil error + invalid value
+    - wrapcheck        # wrap errors from external packages
+    - cyclop           # cyclomatic complexity
+    - gocognit         # cognitive complexity
+    - funlen           # long functions
+
+    ## ── Disabled (too noisy for our codebase) ───────────────────────────
+    # - gochecknoglobals # we use package vars for config/metrics
+    # - gochecknoinits   # we use init for RegisterValidation
+    # - testpackage      # painful retrofit
+    # - godot            # low value
+    # - godoclint        # low value
+    # - mnd              # too aggressive
+    # - dupl             # false positives on handlers/tests
+
+  settings:
+    depguard:
+      rules:
+        "deprecated":
+          files:
+            - "$all"
+          deny:
+            - pkg: github.com/golang/protobuf
+              desc: Use google.golang.org/protobuf instead
+            - pkg: github.com/satori/go.uuid
+              desc: Use github.com/google/uuid instead
+            - pkg: github.com/gofrs/uuid$
+              desc: Use github.com/gofrs/uuid/v5 or later
+            - pkg: github.com/pkg/errors
+              desc: Use stdlib errors + fmt.Errorf with %w
+        "non-test files":
+          files:
+            - "!$test"
+          deny:
+            - pkg: math/rand$
+              desc: Use math/rand/v2 instead
+        "non-main files":
+          files:
+            - "!**/main.go"
+          deny:
+            - pkg: log$
+              desc: Use log/slog instead
+
+    errcheck:
+      check-type-assertions: true
+
+    errorlint:
+      errorf: true
+
+    exhaustive:
+      check:
+        - switch
+        - map
+      default-signifies-exhaustive: true
+
+    gocritic:
+      settings:
+        captLocal:
+          paramsOnly: false
+        underef:
+          skipRecvDeref: false
+
+    cyclop:
+      max-complexity: 15
+
+    funlen:
+      lines: 80
+      statements: 50
+
+    gocognit:
+      min-complexity: 20
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+      settings:
+        shadow:
+          strict: false
+
+    nestif:
+      min-complexity: 4
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    perfsprint:
+      strconcat: false
+
+    reassign:
+      patterns:
+        - ".*"
+
+    rowserrcheck:
+      packages:
+        - github.com/jackc/pgx/v5
+
+    sloglint:
+      no-global: all
+      context: scope
+
+    staticcheck:
+      checks:
+        - all
+        - -ST1000  # package comment
+        - -ST1016  # receiver name consistency
+        - -QF1008  # embedded field selector
+
+    usetesting:
+      os-temp-dir: true
+
+  exclusions:
+    # Skip files with "Code generated" comments (SQLC, protobuf, etc.)
+    generated: lax
+
+    warn-unused: true
+
+    presets:
+      - std-error-handling
+      - common-false-positives
+
+    # Explicit path exclusions for generated code
+    paths:
+      - ".*\\.pb\\.go$"
+      - ".*\\.connect\\.go$"
+      - ".*_gen\\.go$"
+      - "internal/infrastructure/postgres/sqlc/"
+      - "gen/"
+
+    rules:
+      # Relax linters in test files
+      - path: '_test\.go'
+        linters:
+          - bodyclose
+          - containedctx
+          - contextcheck
+          - errcheck
+          - funlen
+          - gosec
+          - noctx
+          - prealloc
+          - unparam
+          - wrapcheck
+
+      # Allow unused params in test files and testutil (mock interface impls)
+      - path: '_test\.go'
+        text: 'unused-parameter'
+        linters: [revive]
+      - path: 'testutil/'
+        text: 'unused-parameter'
+        linters: [revive]
+
+      # Allow dot imports for testify in tests
+      - path: '_test\.go'
+        text: 'dot-imports'
+        linters: [revive, staticcheck]
+
+      # Allow unused ctx params (common in interface impls and mocks)
+      - text: "parameter 'ctx' seems to be unused"
+        linters: [revive]
+
+      # Relax doc comment checks (enable incrementally)
+      - text: 'should have a package comment'
+        linters: [revive]
+      - text: 'exported \S+ \S+ should have comment( \(or a comment on this block\))? or be unexported'
+        linters: [revive]
+      - text: 'comment on exported \S+ \S+ should be of the form'
+        linters: [revive]

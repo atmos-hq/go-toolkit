@@ -1,6 +1,10 @@
 # go-toolkit/common.mk — Shared Makefile for Tracyn Go services
 # Include from service Makefiles: include ../go-toolkit/common.mk
 
+# Load .env if present (dash prefix = no error if missing — CI/prod won't have it)
+-include .env
+export
+
 # Resolve go-toolkit dir relative to this file
 GO_TOOLKIT_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 GOLANGCI_CONFIG := $(GO_TOOLKIT_DIR).golangci.yml

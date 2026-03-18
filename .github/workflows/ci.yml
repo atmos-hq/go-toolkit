@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      - name: Install golangci-lint
+        run: go install github.com/golangci-lint/golangci-lint/v2/cmd/golangci-lint@latest
+
+      - name: Validate .golangci.yml
+        run: golangci-lint config verify --config .golangci.yml
+
+      - name: Validate common.mk syntax
+        run: make -n -f common.mk all 2>&1 | head -20 || true

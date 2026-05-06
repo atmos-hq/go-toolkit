@@ -197,6 +197,11 @@ linters:
       no-global: all
       context: scope
 
+    wrapcheck:
+      ignore-package-globs:
+        - github.com/atmos-hq/**/internal/**
+        - github.com/atmos-hq/**/internal/domain/**
+
     staticcheck:
       checks:
         - all

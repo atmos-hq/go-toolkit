@@ -53,6 +53,7 @@ linters:
     - exhaustive     # exhaustive switch/map statements
     - misspell       # typos in comments and strings
     - prealloc       # slice preallocation hints
+    - forbidigo      # ban specific identifiers (e.g. slog.Default())
 
     # ── Conventions ───────────────────────────────────────────────────
     - goprintffuncname # printf func naming
@@ -137,6 +138,17 @@ linters:
           deny:
             - pkg: log$
               desc: Use log/slog instead
+
+    forbidigo:
+      # Ban bare slog.Default() in service code. Every Service holds an
+      # injected *slog.Logger via constructor / WithLogger option; the
+      # default is acceptable only as the safe-fallback assignment in
+      # constructors and at a handful of documented exception sites
+      # (free-function helpers, ToConnectError, crypto.NewNoopEncryptor).
+      # Those sites carry an inline `//nolint:forbidigo // <reason>`.
+      forbid:
+        - pattern: '^slog\.Default$'
+          msg: "Inject the logger via constructor / WithLogger Option instead of slog.Default()."
 
     errcheck:
       check-type-assertions: true

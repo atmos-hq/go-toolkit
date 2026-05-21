@@ -45,10 +45,20 @@ test-coverage:
 
 # ── Build ─────────────────────────────────────────────────────────────
 
-.PHONY: build vet
+.PHONY: build build-dev vet
 
 build:
 	go build $(GO_BUILD_FLAGS) -o bin/$(BINARY_NAME) ./cmd/$(BINARY_NAME)
+
+# build-dev outputs the binary into ./tmp/ for Air to exec on rebuild,
+# AND injects the same buildinfo ldflags as `build`. Without this air
+# would call bare `go build` and the resulting binary shows
+# "dev (unknown) built unknown" via buildinfo.Format — the boot diag
+# in main becomes useless during local-dev runs. .air.toml files call
+# this target via `make -s build-dev` (plus an optional `sqlc generate`
+# prefix in services with SQL queries).
+build-dev:
+	go build $(GO_BUILD_FLAGS) -o ./tmp/$(BINARY_NAME) ./cmd/$(BINARY_NAME)
 
 vet:
 	go vet ./...

@@ -1,5 +1,11 @@
 # Go Toolkit
 
+## Workspace context
+
+This repo is one of the **Tracyn polyrepo workspace** repos. Cross-repo architecture, the system map, and the documentation **update discipline** live at the workspace root in `_context/` — start at `_context/MAP.md`, and read `_context/PRINCIPLES.md` before any cross-cutting change.
+
+**Update `_context/` as part of any change that touches** the proto surface, RPC routing, Pub/Sub topics, S2S edges, ingress posture, observability wiring, data ownership, or deployment topology — see `_context/PRINCIPLES.md` for which file to update and the full trigger list.
+
 Shared Go tooling configuration for all Tracyn Go services (auth-service, gateway, future services).
 
 ## Contents

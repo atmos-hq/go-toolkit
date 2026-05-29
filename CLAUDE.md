@@ -28,7 +28,7 @@ Include from any service Makefile:
 include ../go-toolkit/common.mk
 ```
 
-This provides targets: `lint`, `lint-fix`, `test`, `test-integration`, `test-e2e`, `test-coverage`, `build`, `vet`, `generate`, `docker-build`, `all`, `check`.
+This provides targets: `lint`, `lint-fix`, `test`, `test-integration`, `test-coverage`, `build`, `build-dev`, `vet`, `generate`, `docker-build`, `all`, `check`.
 
 Override defaults before the include:
 

@@ -17,15 +17,22 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: "stable"
 
+      # Same pinned install.sh pattern as the shared go-ci.yml — the
+      # old `go install` line had a typo'd module owner
+      # (golangci-lint/golangci-lint) and compiled from source besides.
+      # Keep this version in lockstep with go-ci.yml's default.
       - name: Install golangci-lint
-        run: go install github.com/golangci-lint/golangci-lint/v2/cmd/golangci-lint@latest
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
+            | sh -s -- -b "$(go env GOPATH)/bin" v2.12.2
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Validate .golangci.yml
         run: golangci-lint config verify --config .golangci.yml

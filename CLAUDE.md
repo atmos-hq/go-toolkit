@@ -6,7 +6,7 @@ This repo is one of the **Tracyn polyrepo workspace** repos. Cross-repo architec
 
 **Update `_context/` as part of any change that touches** the proto surface, RPC routing, Pub/Sub topics, S2S edges, ingress posture, observability wiring, data ownership, or deployment topology — see `_context/PRINCIPLES.md` for which file to update and the full trigger list.
 
-Shared Go tooling configuration for all Tracyn Go services (auth-service, gateway, future services).
+Shared Go tooling configuration for all Tracyn Go services (auth-service, billing-service, shop-service, gateway, tracking-service).
 
 ## Contents
 
@@ -34,7 +34,7 @@ Include from any service Makefile:
 include ../go-toolkit/common.mk
 ```
 
-This provides targets: `lint`, `lint-fix`, `test`, `test-integration`, `test-coverage`, `build`, `build-dev`, `vet`, `generate`, `docker-build`, `all`, `check`.
+This provides the shared targets (`lint`, `test`, `build`, `generate`, `docker-build`, `all`, `check`, …) — see [`common.mk`](./common.mk) for the full set.
 
 Override defaults before the include:
 

@@ -33,7 +33,7 @@ DOCKER_IMAGE := tracyn/auth-service
 include ../go-toolkit/common.mk
 ```
 
-This provides targets: `lint`, `lint-fix`, `test`, `test-integration`, `test-e2e`, `test-coverage`, `build`, `vet`, `generate`, `docker-build`, `all`, `check`.
+This provides the shared targets (`lint`, `test`, `build`, `generate`, `docker-build`, `all`, `check`, …) — see [`common.mk`](./common.mk) for the full set.
 
 Override defaults before the include:
 
@@ -47,113 +47,13 @@ Services can define additional targets (migrations, key generation, etc.) alongs
 
 ## Enabled Linters
 
-### Error Handling
+The enabled linter set, tuned complexity thresholds (cyclop, gocognit, funlen, nestif), and formatter settings (goimports local prefix `github.com/atmos-hq`, golines max line length 120) live in [`.golangci.yml`](./.golangci.yml) — read it rather than a hand-maintained mirror that drifts. The non-obvious enable/disable rationale (contextcheck despite its false positives, containedctx, sloglint, spancheck, generated-code exclusion) is captured in [`CLAUDE.md`](./CLAUDE.md) → *Key Decisions*.
 
-| Linter | What it catches |
-|--------|-----------------|
-| errcheck | Unchecked errors |
-| errname | Sentinel error naming (`ErrXxx`) |
-| errorlint | Error wrapping, `%w` enforcement |
-| nilerr | Returning nil after error check |
-| nilnesserr | `err != nil` but returns different nil error |
-| wrapcheck | Unwrapped errors from external packages |
-
-### Static Analysis
-
-| Linter | What it catches |
-|--------|-----------------|
-| govet | Suspicious constructs (shadow enabled) |
-| staticcheck | Includes gosimple + stylecheck |
-| unused | Dead code |
-| ineffassign | Useless assignments |
-| unconvert | Unnecessary type conversions |
-| wastedassign | Wasted assignment statements |
-
-### Security
-
-| Linter | What it catches |
-|--------|-----------------|
-| gosec | Security problems |
-
-### Context & HTTP (critical for gRPC/ConnectRPC)
-
-| Linter | What it catches |
-|--------|-----------------|
-| bodyclose | Unclosed HTTP response bodies |
-| containedctx | `context.Context` stored in structs |
-| contextcheck | Context propagation |
-| fatcontext | Nested contexts in loops |
-| noctx | HTTP requests without context |
-
-### Code Quality
-
-| Linter | What it catches |
-|--------|-----------------|
-| revive | Extensible, replaces golint |
-| gocritic | Opinionated improvements |
-| exhaustive | Non-exhaustive switch/map |
-| misspell | Typos in comments and strings |
-| prealloc | Slice preallocation hints |
-
-### Complexity & Structure
-
-| Linter | Threshold |
-|--------|-----------|
-| cyclop | Cyclomatic complexity > 15 |
-| gocognit | Cognitive complexity > 20 |
-| funlen | > 80 lines or > 50 statements |
-| nestif | Nesting complexity > 4 |
-| nonamedreturns | Named returns |
-| nilnil | Simultaneous nil error + nil value |
-
-### Conventions
-
-| Linter | What it catches |
-|--------|-----------------|
-| goprintffuncname | Printf func naming |
-| gomoddirectives | go.mod hygiene |
-| depguard | Blocked packages (see below) |
-
-### SQL & DB
-
-| Linter | What it catches |
-|--------|-----------------|
-| sqlclosecheck | `sql.Rows` / `sql.Stmt` not closed |
-| rowserrcheck | `rows.Err()` not checked (pgx) |
-
-### Testing
-
-| Linter | What it catches |
-|--------|-----------------|
-| testifylint | Testify best practices |
-| tparallel | `t.Parallel()` usage |
-| usetesting | Testing package replacements |
-
-### Telemetry
-
-| Linter | What it catches |
-|--------|-----------------|
-| spancheck | OpenTelemetry span mistakes |
-| sloglint | slog consistency (contextual logging, no globals) |
-
-### Protobuf
-
-| Linter | What it catches |
-|--------|-----------------|
-| protogetter | Proto field getter usage |
-
-### Additional (from golden config)
-
-asciicheck, bidichk, copyloopvar, durationcheck, intrange, nolintlint, perfsprint, predeclared, reassign, recvcheck, usestdlibvars, whitespace, modernize, exptostd, mirror
-
-### Formatters
-
-| Formatter | Setting |
-|-----------|---------|
-| goimports | Local prefix: `github.com/atmos-hq` |
-| golines | Max line length: 120 |
+One grouping worth calling out: the **Context & HTTP** linters (bodyclose, containedctx, contextcheck, fatcontext, noctx) are enabled specifically because context propagation is critical for gRPC/ConnectRPC.
 
 ### Deliberately Disabled
+
+Why each is off (intent — not derivable from the config):
 
 | Linter | Reason |
 |--------|--------|

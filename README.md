@@ -1,4 +1,4 @@
-<img src="https://cdn.tracyn.io/logo/app-icon-192.png" alt="Tracyn" width="72" height="72" align="right">
+<img src="https://cdn.tracyn.io/logo/app-icon-192.png" alt="Tracyn" width="56" height="56">
 
 # go-toolkit
 

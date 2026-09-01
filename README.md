@@ -1,4 +1,8 @@
+<img src="https://cdn.tracyn.io/logo/app-icon-192.png" alt="Tracyn" width="72" height="72" align="right">
+
 # go-toolkit
+
+Run tasks with [`just`](https://just.systems) — `just` lists them, `just setup` installs the pinned toolchain into `bin/`.
 
 Shared Go tooling configuration for all Tracyn Go services (`auth-service`, `gateway`, future services).
 
@@ -7,43 +11,31 @@ Shared Go tooling configuration for all Tracyn Go services (`auth-service`, `gat
 | File | Purpose |
 |------|---------|
 | `.golangci.yml` | Shared [golangci-lint v2](https://golangci-lint.run/) config based on [maratori/golangci-lint-config](https://github.com/maratori/golangci-lint-config) |
-| `common.mk` | Shared Makefile targets (lint, test, build, generate, docker) |
 
 ## Setup
 
-### 1. Symlink the lint config
+### 1. Copy the lint config
 
-golangci-lint v2 has no native config inheritance. We use a symlink so that both `make lint` and bare `golangci-lint run ./...` (IDE integration, CI) find the config:
+golangci-lint v2 has no config inheritance, so every repo carries its own
+byte-identical copy of `.golangci.yml`:
 
 ```bash
-cd ../auth-service
-ln -s ../go-toolkit/.golangci.yml .golangci.yml
+just sync          # copies this repo's config into every consumer
+just check-sync    # fails if any copy has drifted
 ```
 
-> The symlink should be committed to each service repo.
+Commit the copy in each service repo. `go-ci.yml` re-checks it against this
+repo's `main` on every run, so a drifted copy fails CI rather than silently
+linting under different rules.
 
-### 2. Include `common.mk`
+### 2. Pin the same linter version
 
-Add to your service Makefile:
+Each service's justfile pins `golangci_version`. It must match the
+`golangci-lint-version` default in `atmos-hq/.github` `go-ci.yml`, and this
+repo's own pin — otherwise lint passes locally and fails in CI with no diff to
+blame.
 
-```makefile
-BINARY_NAME := auth-service
-DOCKER_IMAGE := tracyn/auth-service
-
-include ../go-toolkit/common.mk
-```
-
-This provides the shared targets (`lint`, `test`, `build`, `generate`, `docker-build`, `all`, `check`, …) — see [`common.mk`](./common.mk) for the full set.
-
-Override defaults before the include:
-
-```makefile
-GO_TEST_FLAGS := -v -race -count=1
-GOLANGCI_TIMEOUT := 10m
-include ../go-toolkit/common.mk
-```
-
-Services can define additional targets (migrations, key generation, etc.) alongside the shared ones.
+Each service owns its own justfile; there is no shared task file to include.
 
 ## Enabled Linters
 
@@ -84,6 +76,6 @@ These linters are disabled in `_test.go` files: bodyclose, containedctx, context
 After any change to this config, verify all consuming services:
 
 ```bash
-cd ../auth-service && make lint
-cd ../gateway && make lint
+cd ../auth-service && just lint
+cd ../gateway && just lint
 ```

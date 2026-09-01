@@ -1,8 +1,8 @@
 # Go Toolkit
 
 ## Commands
-`ln -s ../go-toolkit/.golangci.yml .golangci.yml` — each service symlinks the shared config so both `make lint` and a bare `golangci-lint run` (IDE, CI) find it
-`include ../go-toolkit/common.mk` — pull in shared Make targets; override `BINARY_NAME`/`DOCKER_IMAGE`/`GO_TEST_FLAGS` etc. *before* this include line, not after
+`just sync` / `just check-sync` — each service holds a real copy of `.golangci.yml`, not a symlink; sync pushes this repo's version out, check-sync fails on drift (go-ci.yml enforces the same invariant)
+`just check-consumers` — runs the shared config against every consumer; the only thing that proves a `.golangci.yml` change is safe fleet-wide
 
 ## Unique Patterns
 - `depguard` blocks `log` (use `log/slog`), `math/rand` (use `math/rand/v2`), `github.com/pkg/errors`, and `github.com/golang/protobuf`.

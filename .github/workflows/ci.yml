@@ -31,11 +31,8 @@ jobs:
       - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
-            | sh -s -- -b "$(go env GOPATH)/bin" v2.12.2
+            | sh -s -- -b "$(go env GOPATH)/bin" v2.13.2
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Validate .golangci.yml
         run: golangci-lint config verify --config .golangci.yml
-
-      - name: Validate common.mk syntax
-        run: make -n -f common.mk all 2>&1 | head -20 || true

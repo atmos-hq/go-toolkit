@@ -4,6 +4,14 @@
 
 version: "2"
 
+# Type-check and lint files behind `//go:build integration`. Without this they
+# are invisible to golangci-lint: auth-service has 12 such files (2,842 lines)
+# and tracking-service 17. This does NOT run them — they are testcontainers-based
+# and stay out of `just verify`.
+run:
+  build-tags:
+    - integration
+
 issues:
   max-same-issues: 50
 
